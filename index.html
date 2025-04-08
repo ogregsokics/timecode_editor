@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Időkód Szerkesztő</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
+        #output { white-space: pre-wrap; text-align: left; border: 1px solid #ccc; padding: 10px; }
+        input, button { margin: 10px; }
+    </style>
+</head>
+<body>
+    <h2>Időkód Szerkesztő</h2>
+    <input type="file" id="fileInput">
+    <br>
+    <label>Eltolás (percek):</label>
+    <input type="number" id="minutesInput" min="-999" max="999" value="0">
+    <br>
+    <label>Eltolás (másodpercek):</label>
+    <input type="number" id="secondsInput" min="-59" max="59" value="0">
+    <br>
+    <button onclick="processFile()">Feldolgozás</button>
+    <button onclick="downloadFile()">Letöltés</button>
+    <h3>Eredmény:</h3>
+    <pre id="output"></pre>
+
+    <script>
+        let modifiedText = "";
+
+        function adjustTimecode(timecode, minutesOffset, secondsOffset) {
+            let parts = timecode.split(":").map(Number);
+            let hours = parts.length === 3 ? parts[0] : 0;
+            let minutes = parts.length === 3 ? parts[1] : parts[0];
+            let seconds = parts.length === 3 ? parts[2] : parts[1];
+            
+            let totalSeconds = hours * 3600 + minutes * 60 + seconds + (minutesOffset * 60) + secondsOffset;
+            if (totalSeconds < 0) totalSeconds = 0;
+            
+            let newHours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+            let newMinutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+            let newSeconds = String(totalSeconds % 60).padStart(2, '0');
+            
+            return hours > 0 ? `${newHours}:${newMinutes}:${newSeconds}` : `${newMinutes}:${newSeconds}`;
+        }
+
+        function processFile() {
+            const fileInput = document.getElementById("fileInput");
+            if (!fileInput.files.length) {
+                alert("Válassz egy fájlt!");
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                const minutesOffset = Number(document.getElementById("minutesInput").value);
+                const secondsOffset = Number(document.getElementById("secondsInput").value);
+                modifiedText = text.replace(/\b(\d{1,2}):(\d{2})(?::(\d{2}))?\b/g, match => adjustTimecode(match, minutesOffset, secondsOffset));
+                document.getElementById("output").textContent = modifiedText;
+            };
+            reader.readAsText(fileInput.files[0]);
+        }
+
+        function downloadFile() {
+            if (!modifiedText) {
+                alert("Nincs módosított szöveg!");
+                return;
+            }
+            const blob = new Blob([modifiedText], { type: "text/plain" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "modified_timestamps.txt";
+            link.click();
+        }
+    </script>
+</body>
+</html>
