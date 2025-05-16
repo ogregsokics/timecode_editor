@@ -6,7 +6,13 @@
     <title>Időkód Szerkesztő</title>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
-        #output { white-space: pre-wrap; text-align: left; border: 1px solid #ccc; padding: 10px; }
+        #output { 
+            white-space: pre-wrap; 
+            text-align: left; 
+            border: 1px solid #ccc; 
+            padding: 10px; 
+            font-size: 14px; 
+        }
         input, button { margin: 10px; }
     </style>
 </head>
@@ -19,6 +25,9 @@
     <br>
     <label>Eltolás (másodpercek):</label>
     <input type="number" id="secondsInput" min="-59" max="59" value="0">
+    <br>
+    <label for="fontSizeInput">Betűméret (px):</label>
+    <input type="number" id="fontSizeInput" min="10" max="48" value="14" onchange="updateFontSize()">
     <br>
     <button onclick="processFile()">Feldolgozás</button>
     <button onclick="downloadFile()">Letöltés</button>
@@ -71,6 +80,11 @@
             link.href = URL.createObjectURL(blob);
             link.download = "modified_timestamps.txt";
             link.click();
+        }
+
+        function updateFontSize() {
+            const fontSize = document.getElementById("fontSizeInput").value;
+            document.getElementById("output").style.fontSize = fontSize + "px";
         }
     </script>
 </body>
